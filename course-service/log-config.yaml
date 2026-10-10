@@ -16,8 +16,9 @@ handlers:
 loggers:
   src:
     level: DEBUG
-    handlers: [ console ]
-    
+    handlers: [console]
+    propagate: false
+
 root:
   level: INFO
-  handlers: [ console ]
+  handlers: [console]

@@ -1,9 +1,14 @@
+"""Настройки сервиса."""
+
 import functools
 from typing import final
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AppSettings(BaseSettings):
+    """Настройки веб-приложения."""
+
     title: str = "Course service title"
     description: str = "Course service description"
     summary: str = "Course service summary"
@@ -13,6 +18,8 @@ class AppSettings(BaseSettings):
 
 @final
 class Settings(BaseSettings):
+    """Общие настройки сервиса."""
+
     app: AppSettings
 
     model_config = SettingsConfigDict(
@@ -24,5 +31,6 @@ class Settings(BaseSettings):
 
 
 @functools.lru_cache
-def get_settings():
+def get_settings() -> Settings:
+    """Загрузить и кешировать настройки."""
     return Settings()
