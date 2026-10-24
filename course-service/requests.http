@@ -1,0 +1,106 @@
+# Примеры запросов Course Service API.
+# Токены и UUID заменяются данными тестового окружения.
+# Примеры описывают ответы API; сгенерированные обработчики пока не реализованы.
+
+@baseUrl = http://127.0.0.1:8888
+@adminToken = REPLACE_WITH_ADMIN_JWT
+@teacherToken = REPLACE_WITH_PROFESSOR_JWT
+@studentToken = REPLACE_WITH_STUDENT_JWT
+@courseId = 550e8400-e29b-41d4-a716-446655440000
+@assignmentId = a64f6a42-a0dc-41e3-a7e1-e6fa1cd29605
+@submissionId = cbcc2c26-ccf8-47c6-a969-bdd72781bdba
+
+### 201: создать курс (преподаватель существует)
+POST {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{adminToken}}
+Idempotency-Key: 56417013-252a-4fa5-a856-18ff14eb32cc
+Content-Type: application/json
+
+{
+  "title": "Backend-разработка на Python",
+  "description": "Учебный курс по разработке HTTP API на Python с использованием FastAPI.",
+  "teacher_id": "7c613d3e-6ae1-4b62-810b-bd2455345624"
+}
+
+### 200: список активных курсов с фильтрацией, сортировкой и пагинацией
+GET {{baseUrl}}/api/v1/courses?status=ACTIVE&limit=10&offset=0&sort=created_at:desc
+Authorization: Bearer {{adminToken}}
+
+### 200: изменить только статус курса
+PATCH {{baseUrl}}/api/v1/courses/{{courseId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{"status": "ACTIVE"}
+
+### 201: создать задание в своём курсе
+POST {{baseUrl}}/api/v1/assignments
+Authorization: Bearer {{teacherToken}}
+Idempotency-Key: 6dcd7a53-1fab-458b-baa9-74ae9a069875
+Content-Type: application/json
+
+{
+  "course_id": "{{courseId}}",
+  "title": "Проектирование REST API",
+  "description": "Подготовить OpenAPI-контракт сервиса управления учебными курсами.",
+  "attempts_limit": 5,
+  "date_start": "2026-10-24",
+  "date_end": "2026-10-31",
+  "materials_url": null
+}
+
+### 201: отправить решение (студент записан, курс ACTIVE, срок открыт, попытки есть)
+POST {{baseUrl}}/api/v1/submissions
+Authorization: Bearer {{studentToken}}
+Idempotency-Key: 02fa8310-c30b-4713-86cc-a69daa8b0331
+Content-Type: application/json
+
+{
+  "assignment_id": "{{assignmentId}}",
+  "repository_url": "https://github.com/example/python-lab-02"
+}
+
+### 201: ручная проверка (после окончания срока сдачи, проверки ещё нет)
+POST {{baseUrl}}/api/v1/submissions/{{submissionId}}/review
+Authorization: Bearer {{teacherToken}}
+Idempotency-Key: 177d2129-d16a-43a3-9dfd-0e91b731d946
+Content-Type: application/json
+
+{"feedback": "Основные требования выполнены.", "mark": 8.5, "status": "PASSED"}
+
+### 401 TOKEN_MISSING: токен отсутствует
+GET {{baseUrl}}/api/v1/courses
+
+### 403 ACCESS_DENIED: студент не может изменять курс
+PATCH {{baseUrl}}/api/v1/courses/{{courseId}}
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{"status": "CLOSED"}
+
+### 404 COURSE_NOT_FOUND: курс с указанным UUID отсутствует
+GET {{baseUrl}}/api/v1/courses/00000000-0000-4000-8000-000000000000
+Authorization: Bearer {{adminToken}}
+
+### 422 VALIDATION_ERROR: limit больше 100
+GET {{baseUrl}}/api/v1/courses?limit=101
+Authorization: Bearer {{adminToken}}
+
+### 422 VALIDATION_ERROR: PATCH не содержит изменений
+PATCH {{baseUrl}}/api/v1/courses/{{courseId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{}
+
+### 409 IDEMPOTENCY_KEY_CONFLICT: ключ создания курса прежний, тело другое
+POST {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{adminToken}}
+Idempotency-Key: 56417013-252a-4fa5-a856-18ff14eb32cc
+Content-Type: application/json
+
+{
+  "title": "Другой учебный курс Python",
+  "description": "Описание другого курса для демонстрации конфликта ключа идемпотентности.",
+  "teacher_id": "7c613d3e-6ae1-4b62-810b-bd2455345624"
+}
