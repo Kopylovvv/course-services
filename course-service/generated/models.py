@@ -90,9 +90,9 @@ class AssignmentCreate(BaseModel):
     title: constr(min_length=1, max_length=255)
     description: constr(min_length=1, max_length=4096)
     attempts_limit: conint(ge=3, le=10) = 3
-    date_start: date = Field(..., description="Первый день приёма решений.")
+    date_start: date = Field(..., description="Приём решений с 00:00 Europe/Moscow.")
     date_end: date = Field(
-        ..., description="Последний день приёма решений включительно."
+        ..., description="Последний день приёма включительно, Europe/Moscow."
     )
     materials_url: AnyUrl | None = None
 
@@ -104,9 +104,11 @@ class AssignmentPatch(BaseModel):
     title: constr(min_length=1, max_length=255) | None = None
     description: constr(min_length=1, max_length=4096) | None = None
     attempts_limit: conint(ge=3, le=10) | None = None
-    date_start: date | None = Field(None, description="Первый день приёма решений.")
+    date_start: date | None = Field(
+        None, description="Приём решений с 00:00 Europe/Moscow."
+    )
     date_end: date | None = Field(
-        None, description="Последний день приёма решений включительно."
+        None, description="Последний день приёма включительно, Europe/Moscow."
     )
     materials_url: AnyUrl | None = None
 
@@ -120,9 +122,9 @@ class Assignment(BaseModel):
     title: constr(min_length=1, max_length=255)
     description: constr(min_length=1, max_length=4096)
     attempts_limit: conint(ge=3, le=10)
-    date_start: date = Field(..., description="Первый день приёма решений.")
+    date_start: date = Field(..., description="Приём решений с 00:00 Europe/Moscow.")
     date_end: date = Field(
-        ..., description="Последний день приёма решений включительно."
+        ..., description="Последний день приёма включительно, Europe/Moscow."
     )
     materials_url: AnyUrl | None = Field(...)
     created_at: AwareDatetime

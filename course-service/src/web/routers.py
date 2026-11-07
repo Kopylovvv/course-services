@@ -1,14 +1,10 @@
 """Служебные HTTP-маршруты."""
 
-import logging
-
 from fastapi import APIRouter
 
 from src.core.services import get_service_info
 from src.web.lifespans import lifespan_service_router
 from src.web.schemas import ServiceInfo
-
-logger = logging.getLogger(__name__)
 
 service_router = APIRouter(
     prefix="/service",
