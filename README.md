@@ -167,3 +167,44 @@ course-service/
 ```
 
 Локальный `.env` создаётся из `.env.example` и не попадает в репозиторий.
+
+## Лабораторная работа № 2: HTTP и REST API
+
+В `course-service/openapi.yaml` описаны курсы, задания, сдачи и проверки:
+адреса запросов, схемы данных, права доступа, пагинация и ошибки.
+Описание сервиса, основные правила и таблица кодов ответов находятся в начале файла.
+Примеры запросов собраны в `course-service/requests.http`.
+
+Команды выполняются из каталога `course-service`.
+
+Проверка спецификации и тесты:
+
+```bash
+uv sync --locked
+uv run --locked openapi-spec-validator openapi.yaml
+uv run --locked pytest
+```
+
+Генерация моделей Pydantic v2 и обработчиков FastAPI:
+
+```bash
+uv run --locked python scripts/generate_api.py
+```
+
+Скрипт запускает `fastapi-codegen` с параметрами `--input openapi.yaml`,
+`--output generated` и `--output-model-type pydantic_v2.BaseModel`,
+затем форматирует полученные файлы.
+Генератор установлен в группе `codegen` и запускается отдельно от анализаторов
+из-за несовместимых требований к версии isort.
+
+Запуск сгенерированного приложения:
+
+```bash
+uv run --locked uvicorn generated.main:app --host 127.0.0.1 --port 8888
+```
+
+Документация доступна по адресу `http://127.0.0.1:8888/docs`.
+Полная спецификация хранится в `openapi.yaml`; её можно открыть в Swagger Editor.
+В `generated/` находятся модели и пустые обработчики. Бизнес-логика в них ещё не реализована.
+
+Приложение первой лабораторной запускается через `src.main:app`.
